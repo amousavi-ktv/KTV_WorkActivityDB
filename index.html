@@ -70,7 +70,7 @@
     cursor:pointer;user-select:none;}
   .toggle input{accent-color:var(--accent);width:15px;height:15px;}
 
-  .layout{display:grid;grid-template-columns:288px 1fr;gap:18px;align-items:start;}
+  .layout{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start;}
   @media (max-width:820px){.layout{grid-template-columns:1fr;}}
 
   .side{background:var(--surface);border:1px solid var(--border);border-radius:12px;
@@ -83,12 +83,13 @@
     font-weight:650;}
   .grouplabel .ct{margin-left:auto;font-variant-numeric:tabular-nums;
     background:var(--panel);border-radius:20px;padding:1px 8px;color:var(--muted);}
-  .objbtn{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  .objbtn{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;
     border:0;background:transparent;color:var(--text);padding:6px 9px;border-radius:7px;
     cursor:pointer;font-family:var(--mono);font-size:.8rem;line-height:1.35;}
   .objbtn:hover{background:var(--panel-2);}
   .objbtn.active{background:var(--accent-soft);color:var(--text);font-weight:600;}
-  .objbtn .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+  .objbtn .dot{margin-top:4px;}
+  .objbtn .nm{flex:1;white-space:normal;overflow-wrap:anywhere;}
   .objbtn.legacy .nm{opacity:.55;font-style:italic;}
   .star{color:var(--accent);font-size:.7rem;}
 
