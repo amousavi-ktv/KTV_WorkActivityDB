@@ -893,7 +893,7 @@ const STATUS={
     const ord={view:0,staged:1,table:2,proc:3};
     holders.sort(function(a,b){ const ka=kindOf(a.obj), kb=kindOf(b.obj); return ka===kb ? a.obj.localeCompare(b.obj) : ord[ka]-ord[kb]; });
     const hdr=document.createElement('div'); hdr.className='row colhdr2';
-    hdr.innerHTML='<span class="caret leaf">▶</span><span class="label">object</span><span class="hstatus">status</span>';
+    hdr.innerHTML='<span class="caret leaf">▶</span><span class="label">object</span><span class="hstatus">reference</span>';
     tree.appendChild(hdr);
     holders.forEach(function(o){
       const k=kindOf(o.obj);
@@ -908,11 +908,15 @@ const STATUS={
       tree.appendChild(row);
     });
   }
-  const STATUS_TITLE={created:'defined / computed in this view',used:'passed through from a source',both:'both — computed AND passed through in this view'};
+  const STATUS_TITLE={created:'defined / computed in this view (including conditional)',used:'referenced / passed through / stored'};
   function statusOf(obj, col){
-    if(kindOf(obj)!=='view') return null;          // status only for views (tables & procs ignored)
-    const m=(typeof STATUS!=='undefined') ? STATUS[obj] : null;
-    return (m && m[col]) ? m[col] : 'used';
+    if(kindOf(obj)==='proc') return null;   // procs have no columns
+    if(kindOf(obj)==='view'){
+      const m=(typeof STATUS!=='undefined') ? STATUS[obj] : null;
+      const s = m ? m[col] : null;
+      return (s==='created' || s==='both') ? 'created' : 'used';   // 'both' folds into created
+    }
+    return 'used';   // base & materialised tables: the column is stored/used here, not computed
   }
 
   // ---- tree ----
