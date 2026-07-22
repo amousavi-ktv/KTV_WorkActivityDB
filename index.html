@@ -243,7 +243,6 @@
         <div class="treeactions">
           <button id="expandAll">Expand all</button>
           <button id="collapseAll">Collapse</button>
-          <span class="dirnote" id="dirnote"></span>
         </div>
         <div class="tree" id="tree"></div>
       </div>
@@ -966,8 +965,6 @@ const STATUS={
   function renderTree(){
     const host=document.getElementById('tree');
     host.innerHTML='';
-    document.getElementById('dirnote').textContent =
-      dir==='down' ? 'arrows point to what each object reads / calls' : 'arrows point to what reads / calls each object';
     if(!selected){ host.innerHTML='<div class="empty">Pick an object on the left to trace its dependencies.</div>'; return; }
     const rootNode=nodes.get(selected);
     if(!rootNode){ host.innerHTML='<div class="empty"><b>'+selected+'</b> has no dependency edges — it isn\'t referenced by, and doesn\'t reference, any other object.</div>'; return; }
