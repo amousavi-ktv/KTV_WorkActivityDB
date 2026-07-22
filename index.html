@@ -176,10 +176,11 @@
   .colrow.hit{background:color-mix(in srgb,var(--accent) 16%,transparent);border-radius:4px;
     margin:0 -6px;padding-left:6px;padding-right:6px;}
   .colrow.hit .cname{font-weight:700;color:var(--accent);}
-  .fromcol{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;cursor:pointer;font-family:var(--mono);
+  .barcol{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:.74rem;cursor:pointer;font-family:var(--mono);
     color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
-    background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:6px;padding:2px 8px;}
-  .fromcol:hover{background:color-mix(in srgb,var(--accent) 20%,transparent);}
+    background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:6px;padding:1px 8px;}
+  .barcol:hover{background:color-mix(in srgb,var(--accent) 20%,transparent);}
+  .barcol .bctype{color:var(--muted);font-size:.68rem;}
 
   .legend{display:flex;flex-wrap:wrap;gap:14px 20px;margin-top:18px;padding:14px 16px;
     background:var(--panel-2);border:1px solid var(--border);border-radius:10px;
@@ -887,26 +888,17 @@ const COLS={
     host._root=root;
   }
 
-  function addFromCol(el){
-    if(!fromColumn) return;
-    const chip=document.createElement('span'); chip.className='fromcol';
-    chip.textContent='↩ column: '+fromColumn;
-    chip.title='Back to the list of objects containing '+fromColumn;
-    chip.addEventListener('click',function(){ selectColumn(fromColumn); });
-    el.appendChild(chip);
-  }
   function renderHead(){
     const el=document.getElementById('selhead');
     if(!selected){ el.innerHTML='<span style="color:var(--muted);font-size:.9rem">No object selected</span>'; return; }
     const n=nodes.get(selected);
-    if(!n){ el.innerHTML='<span class="name"><span class="dot '+kindOf(selected)+'"></span><span class="nm">'+selected+'</span></span><span class="kindtag '+kindOf(selected)+'">'+kindOf(selected)+'</span><span class="counts">no dependency edges</span>'; addFromCol(el); return; }
+    if(!n){ el.innerHTML='<span class="name"><span class="dot '+kindOf(selected)+'"></span><span class="nm">'+selected+'</span></span><span class="kindtag '+kindOf(selected)+'">'+kindOf(selected)+'</span><span class="counts">no dependency edges</span>'; return; }
     const kl={proc:'Stored proc',view:'View',table:'Base table',staged:'Materialised table'}[n.kind];
     el.innerHTML=
       '<span class="name"><span class="dot '+n.kind+'"></span><span class="nm">'+n.name+'</span></span>'+
       '<span class="kindtag '+n.kind+'">'+kl+'</span>'+
       '<span class="counts"><span>depends on <b>'+degOut(n.name)+'</b></span>'+
       '<span>used by <b>'+degIn(n.name)+'</b></span></span>';
-    addFromCol(el);
   }
 
   function renderCols(){
@@ -921,22 +913,26 @@ const COLS={
     const hdr=document.createElement('div'); hdr.className='colrow colhdr';
     hdr.innerHTML='<span>column</span><span>type</span><span class="cflag">null?</span>';
     grid.appendChild(hdr);
-    let hitRow=null;
+    let hitType=null;
     cols.forEach(function(c){
       const row=document.createElement('div'); row.className='colrow'+(c[0]===fromColumn?' hit':'');
       const nn = c[2] ? '<span class="cflag nl">null</span>' : '<span class="cflag nn">not&nbsp;null</span>';
       row.innerHTML='<span class="cname">'+c[0]+'</span><span class="ctype">'+c[1]+'</span>'+nn;
       grid.appendChild(row);
-      if(c[0]===fromColumn) hitRow=row;
+      if(c[0]===fromColumn) hitType=c[1];
     });
+    // if we arrived by clicking a column, name it on the bar (with its type here) — no auto-expand
+    if(fromColumn && hitType!==null){
+      const fc=document.createElement('span'); fc.className='barcol';
+      fc.innerHTML='↩ '+fromColumn+' <span class="bctype">'+hitType+'</span>';
+      fc.title='Back to the objects containing '+fromColumn;
+      fc.addEventListener('click',function(e){ e.stopPropagation(); selectColumn(fromColumn); });
+      bar.appendChild(fc);
+    }
     bar.addEventListener('click',function(){
       grid.classList.toggle('hidden'); bar.querySelector('.caret2').classList.toggle('open');
     });
     box.appendChild(bar); box.appendChild(grid);
-    if(hitRow){   // came from a column click → open the panel and reveal that field
-      grid.classList.remove('hidden'); bar.querySelector('.caret2').classList.add('open');
-      setTimeout(function(){ try{ hitRow.scrollIntoView({block:'nearest'}); }catch(e){} }, 0);
-    }
   }
 
   function renderMain(){
