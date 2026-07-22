@@ -94,13 +94,10 @@
     border-radius:20px;padding:1px 8px;font-variant-numeric:tabular-nums;}
   .row .ctype{font-family:var(--mono);color:var(--view);font-size:.76rem;margin-left:8px;}
   .row .cflag{font-size:.68rem;margin-left:6px;}
-  .row .strole{margin-left:auto;font-size:.64rem;font-weight:650;text-transform:uppercase;letter-spacing:.04em;
-    padding:1px 7px;border-radius:5px;white-space:nowrap;}
-  .strole.created{color:#23a565;border:1px solid color-mix(in srgb,#23a565 48%,transparent);
-    background:color-mix(in srgb,#23a565 14%,transparent);}
-  .strole.used{color:var(--faint);border:1px solid var(--border-strong);}
-  .strole.both{color:var(--table);border:1px solid color-mix(in srgb,var(--table) 48%,transparent);
-    background:color-mix(in srgb,var(--table) 14%,transparent);}
+  .row .strole{margin-left:auto;font-size:.68rem;font-weight:700;letter-spacing:.02em;
+    padding:2px 9px;border-radius:5px;white-space:nowrap;}
+  .strole.created{color:#ffffff;background:#189653;border:1px solid #12793f;}
+  .strole.used{color:var(--muted);background:var(--panel);border:1px solid var(--border-strong);}
   .row.colhdr2{font-family:var(--sans);color:var(--faint);font-size:.66rem;text-transform:uppercase;
     letter-spacing:.06em;border-bottom:1px solid var(--border-strong);cursor:default;padding-bottom:5px;}
   .row.colhdr2:hover{background:transparent;}
@@ -901,22 +898,20 @@ const STATUS={
       row.title='Open '+o.obj+'’s dependency tree';
       const flag=o.nullable?'<span class="cflag nl">null</span>':'<span class="cflag nn">not&nbsp;null</span>';
       const st=statusOf(o.obj, selectedCol);
-      const stchip = st ? '<span class="strole '+st+'" title="'+STATUS_TITLE[st]+'">'+st+'</span>' : '';
+      const stchip = st ? '<span class="strole '+st+'" title="'+STATUS_TITLE[st]+'">'+STATUS_LABEL[st]+'</span>' : '';
       row.innerHTML='<span class="caret leaf">▶</span><span class="dot '+k+'"></span>'+
         '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag+stchip;
       row.addEventListener('click',function(){ select(o.obj, selectedCol); });
       tree.appendChild(row);
     });
   }
-  const STATUS_TITLE={created:'defined / computed in this view (including conditional)',used:'referenced / passed through / stored'};
+  const STATUS_TITLE={created:'defined / computed in this view (including conditional)',used:'referenced / passed through'};
+  const STATUS_LABEL={created:'Defined',used:'Used'};
   function statusOf(obj, col){
-    if(kindOf(obj)==='proc') return null;   // procs have no columns
-    if(kindOf(obj)==='view'){
-      const m=(typeof STATUS!=='undefined') ? STATUS[obj] : null;
-      const s = m ? m[col] : null;
-      return (s==='created' || s==='both') ? 'created' : 'used';   // 'both' folds into created
-    }
-    return 'used';   // base & materialised tables: the column is stored/used here, not computed
+    if(kindOf(obj)!=='view') return null;   // views only — tables/procs contain the column by definition
+    const m=(typeof STATUS!=='undefined') ? STATUS[obj] : null;
+    const s = m ? m[col] : null;
+    return (s==='created' || s==='both') ? 'created' : 'used';   // 'both' folds into Defined
   }
 
   // ---- tree ----
