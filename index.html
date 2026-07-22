@@ -99,6 +99,8 @@
   .strole.created{color:#23a565;border:1px solid color-mix(in srgb,#23a565 48%,transparent);
     background:color-mix(in srgb,#23a565 14%,transparent);}
   .strole.used{color:var(--faint);border:1px solid var(--border-strong);}
+  .strole.both{color:var(--table);border:1px solid color-mix(in srgb,var(--table) 48%,transparent);
+    background:color-mix(in srgb,var(--table) 14%,transparent);}
   .row.colhdr2{font-family:var(--sans);color:var(--faint);font-size:.66rem;text-transform:uppercase;
     letter-spacing:.06em;border-bottom:1px solid var(--border-strong);cursor:default;padding-bottom:5px;}
   .row.colhdr2:hover{background:transparent;}
@@ -681,50 +683,48 @@ const DESCR={
 "uspUpdateExceptionCorrection":"Commits approved-but-uncommitted exception corrections in tblTaskLogExceptionCorrection (IsApproved set, IsCommitted=0); preview or update mode."
 /*__DESCR_END__*/
 };
-// Per view: which of its columns are CREATED here (not referenced from a source; else 'used').
-// From sys.dm_sql_referenced_entities — regenerate with build_dependency_tree.ps1
-const STATUS_CREATED={
+// Per view: columns that are 'created' or 'both' here (heuristic on the view definition text; 'used' is the default).
+// Regenerate with build_dependency_tree.ps1
+const STATUS={
 /*__STATUS_START__*/
-"vewActivitiesAttendance_KEEPforUSP":["ExtraBreakDuration","LunchBreakDuration","LunchBreakEndTime","LunchBreakStartTime","Rank","ViewID","WorkDuration","WorkEndTime","WorkStartTime"],
-"vewActivitiesAttendanceRecord_KEEPforUSP":["AdjustedWorkDailyBalance","Adjustment","Attendance","AttendanceRecordID","DailyStatus","DailyTarget","DatetimeFrom","DatetimeTo","StatusCode","SwapLogID","WorkDailyBalance","WorkDailyTarget"],
-"vewActivitiesProcessedSource_KEEPForUSP":["ActivitiesProcessedID","ActivityDate","ActivityDateOnOvernightTask","AdminKey","ConsecutiveDuplicateID","Duration_Seconds","ExceptionCode","ExceptionTaskLogID","IsActiveData","IsDayFirstEntry","IsDayLastEntry","IsFinishOption","IsOrphanOvernightTask","NextActivityTimestamp","NextPersonID","NextTask","NextTaskID","OvernightWorkStatus","PrevActivityTimestamp","PrevPersonID","PrevTask","PrevTaskID","SameDayNextTask","SameDayPrevTask"],
-"vewActivitiesTimesheetAnnualSummary":["AttendanceRecordID","TaskLogID"],
-"vewActivitiesTimesheetDetails$App":["Duration"],
-"vewActivitiesTimesheetExceptionCorrection$App":["ActivityTimestampAdjusted","AttendanceRecordID","EarlyMorningEndTime","EarlyMorningStartTime","IsDaySingleEntry","NormalEndTime","NormalStartTime","SameDayNextActivityTimestamp","SameDayPrevActivityTimestamp","StatusBarChangeComplete","StatusBarGoodToSubmit","StatusBarInitial","StatusBarInputError","StatusBarInputWarning"],
-"vewActivitiesTimesheetMaster$App":["DailyBalance","EndTimeLagLead","ExceptionDaysGap","ExceptionTimeElapsed","FirstActivityTime","IsInvalidExceptionTimeRange","LastActivityTime","OverallBreakDuration","StartTimeLagLead"],
-"vewActivitiesWorkSchedule_KEEPforUSP":["DailyTargetHours","DailyTargets","EntitledLeave","EntitledSickLeave","LeaveAdjustment","StatutoryHoliday","ViewID"],
-"vewActivitiesWorkScheduleMultipleEntries":["ActivityDate","ViewID"],
-"vewActivitiesWorkScheduleSingleEntry":["ActivityDate","ViewID"],
-"vewActivitiesWorkScheduleXAttendance":["ViewID","WorkTargetsExceptions"],
-"vewActivitiesWorkShcheduleSequence":["DateFrom","DateTo","WeeklyTargetHours"],
-"vewAdmin$App":["Admin_ID","RoleRemarks","ViewID"],
-"vewAttendanceException_Absence":["AbsenceCode","ActivityDate","DaysCount","ErrorMessage"],
-"vewAttendanceException_Swap":["AbsenceCode","ActivityDate","ErrorMessage","SwapInOut"],
-"vewAttendanceException_TimeOff":["AbsenceCode","ActivityDate","ErrorMessage","RowNumber"],
-"vewAttendanceExceptionApproval":["ProcessedByKey"],
-"vewAttendanceExceptionCategory":["CombinedRemarks","GroupRemarks"],
-"vewAttendanceExceptionLog$App":["ApprovalRemarks","ApprovalStatus","RequestorKey"],
-"vewAttendanceExceptionMenu$App":["GroupID","ViewID"],
-"vewAttendanceExceptionProcessed":["AbsenceCategory","ApprovalStatus","ArrivalDepartureTime","FK_AbsenceCode","RequestOptionCode"],
-"vewCalendar":["IsIgnoredCoreHour","IsReligiousHoliday","IsWorkDay","WorkTargetAdjustment"],
-"vewCalendar_AdjustedHijri":["AdjustedHijriDay","AdjustedHijriMonth","MoonSightingAdjustment","ReligiousHoliday"],
-"vewEmployeeWorkHistory":["fk_PersonID","FrequencySymbol"],
-"vewEmployeeWorkHistoryLatest":["RowNumber"],
-"vewHoliday":["HolidayType","HolidayTypeSymbol","IsReligiousHoliday"],
-"vewImportActivities":["fk_AdminID","fk_PersonID","fk_TaskID","IsAdminCorrection","TaskLogID"],
-"vewImportActivitiesCorrectionRequest":["CorrectionRequestTimestamp","CorrectionTask","ExceptionSpec","fk_AdminID","IsAdminCorrection","IsApproved","IsIgnoredException","Task_OriginalEnd","Task_OriginalStart","TaskID_OriginalEnd","TaskID_OriginalStart","WorkActivities"],
-"vewImportActivitiesExceptionsCorrection":["CorrectionRequestTimestamp","CorrectionTask","ExceptionSpec","fk_AdminID","IsAdminCorrection","IsApproved","Task_OriginalEnd","Task_OriginalStart","TaskID_OriginalEnd","TaskID_OriginalStart","WorkActivities"],
-"vewImportAttendanceExceptionApproval":["FK_LogID","IsApproved","RejectionReason","Remarks"],
-"vewImportAttendanceExceptionLog":["DailyTotalMinutes","DaysCredit","FK_CategoryID","FK_PersonID","FK_ProcessedByID","FK_RequestorID","HoursCredit","MinutesToCredit_Import","RowNumber"],
-"vewLegend$App":["LegendCode","LegendViewID"],
-"vewPerson$App":["RoleRemarks","ViewID"],
-"vewSearchAllViewsForString":["definition","schema","view_name"],
-"vewTaskLog_Recent$App":["AdminKey"],
-"vewTaskLogCorrection$App":["AdminKey","CorrectionID","ExceptionCodeCorrected","ExceptionCodeProcessed","ExceptionSpec","HasError","IsCorrectionRequest","Status","TimestampAfter","TimestampBefore"],
-"vewTaskLogCorrection_Latest":["RowNumber"],
-"vewTaskLogCount":["TaskCount","TaskRank"],
-"vewTaskLogExceptionCorrectionImport":["CorrectionID","ExceptionCodeCorrected","ExceptionCodeProcessed","ExceptionSpec","IsCorrectionRequest"],
-"vewTaskLogWithDuplicateFlag":["ConsecutiveDuplicateID","PrevShiftedDate","PrevTaskID","PrevTaskLogID","PrevTimestamp","ShiftedDate"]
+"vewActivitiesTimesheetDetails$App":{"OvernightWorkStatus":"created","Duration":"created"},
+"vewAttendanceException_Absence":{"ActivityDate":"both","DaysCount":"both","Remarks":"both"},
+"vewAttendanceExceptionMenu$App":{"ViewID":"created","AttributeAlias":"both"},
+"vewActivitiesWorkScheduleMultipleEntries":{"ViewID":"created","ActivityDate":"both","YearTimestamp":"both"},
+"vewImportActivitiesCorrectionRequest":{"IsAdminCorrection":"both","IsIgnoredException":"both","CorrectionRemarks":"both","AID":"both","CorrectionTask":"both","ExceptionTimeRange":"both","Task_OriginalStart":"both","Task_OriginalEnd":"both"},
+"vewActivitiesProcessedSource_KEEPForUSP":{"ActivitiesProcessedID":"created","ConsecutiveDuplicateID":"both","TaskLogID":"both","ActivityDate":"both","OvernightWorkStatus":"both","IsFinishOption":"both","IsDayFirstEntry":"both","IsDayLastEntry":"both","Duration_Seconds":"both","ExceptionCode":"both","ExceptionCorrectionKey":"both","ExceptionTimeRange":"both","ExceptionTaskLogID":"both","IsActiveData":"created","ExceptionSpec":"both","PrevPersonID":"both","NextPersonID":"both","PrevTaskID":"both","NextTaskID":"both","PrevActivityTimestamp":"both","NextActivityTimestamp":"both","IsOrphanOvernightTask":"both","ActivityDateOnOvernightTask":"both","WorkActivities":"both","Remarks":"both","Task":"both","PrevTask":"both","NextTask":"both"},
+"vewAdmin$App":{"ViewID":"created"},
+"vewTaskLogCount":{"TaskCount":"created","TaskRank":"created"},
+"vewActivitiesWorkScheduleXAttendance":{"ViewID":"created"},
+"vewLegend$App":{"LegendViewID":"created"},
+"vewImportAttendanceExceptionApproval":{"IsApproved":"created","RejectionReason":"created","Remarks":"created"},
+"vewAttendanceExceptionLog$App":{"ReasonForException":"both","ApprovalStatus":"created"},
+"vewAttendanceExceptionCategory":{"CombinedRemarks":"created"},
+"vewHoliday":{"HolidayType":"created","HolidayTypeSymbol":"created"},
+"vewActivitiesAttendance_KEEPforUSP":{"ViewID":"created","WorkStartTime":"both","WorkEndTime":"both","ActionTimestamp":"both","LunchBreakStartTime":"both","LunchBreakEndTime":"both","LunchBreakDuration":"created","ExtraBreakDuration":"both","WorkDuration":"created","Rank":"both"},
+"vewImportActivitiesExceptionsCorrection":{"IsAdminCorrection":"both","IsIgnoredException":"both","CorrectionRemarks":"both","AID":"both","CorrectionTask":"both","ExceptionTimeRange":"both","Task_OriginalStart":"both","Task_OriginalEnd":"both"},
+"vewActivitiesTimesheetExceptionCorrection$App":{"AttendanceRecordID":"created","TaskLogID":"both","ActivityDate":"both","IsDaySingleEntry":"both","SameDayPrevActivityTimestamp":"both","SameDayNextActivityTimestamp":"both","StatusBarInitial":"created","StatusBarInputWarning":"both","StatusBarInputError":"both","StatusBarGoodToSubmit":"both","StatusBarChangeComplete":"both","NormalStartTime":"both","NormalEndTime":"both","EarlyMorningStartTime":"both","EarlyMorningEndTime":"both","ActivityTimestampAdjusted":"both"},
+"vewAttendanceException_Swap":{"ActivityDate":"created","SwapInOut":"created"},
+"vewCalendar_AdjustedHijri":{"HijriDay":"both","HijriMonth":"both","HijriYear":"both","GregorianDate":"both","AdjustedHijriDay":"both","AdjustedHijriMonth":"both","ReligiousHoliday":"created"},
+"vewEmployeeWorkHistoryLatest":{"RowNumber":"both"},
+"vewImportActivities":{"IsAdminCorrection":"both","WorkActivities":"both","Remarks":"both","AID":"both","Task":"both"},
+"vewTaskLogWithDuplicateFlag":{"ShiftedDate":"both","PrevTaskLogID":"both","PrevTaskID":"both","PrevTimestamp":"both","PrevShiftedDate":"both","ConsecutiveDuplicateID":"created"},
+"vewActivitiesWorkScheduleSingleEntry":{"ViewID":"created"},
+"vewActivitiesAttendanceRecord_KEEPforUSP":{"AttendanceRecordID":"both","ExceptionTaskLogID":"both","TaskLogID":"both","AbsenceCode":"both","StatusCode":"both","DailyTargets":"both","DatetimeFrom":"both","DatetimeTo":"both","WorkDailyTarget":"both","WorkDuration":"both","Adjustment":"both","DailyStatus":"both","Attendance":"both","WorkDailyBalance":"both","AdjustedWorkDailyBalance":"both","ExceptionCode":"both","ExceptionTimeRange":"both","ExceptionCorrectionKey":"both","ExceptionSpec":"both"},
+"vewEmployeeWorkHistory":{"fk_PersonID":"created","PID":"both","FrequencySymbol":"created"},
+"vewCalendar":{"IsReligiousHoliday":"created","IsWorkDay":"created","WorkTargetAdjustment":"created","IsIgnoredCoreHour":"created"},
+"vewActivitiesWorkShcheduleSequence":{"Frequency":"both","AverageDailyTargetDuration":"both","WeeklyTargetHours":"created"},
+"vewSearchAllViewsForString":{"schema":"created","view_name":"created"},
+"vewPerson$App":{"ViewID":"created"},
+"vewActivitiesTimesheetAnnualSummary":{"AttendanceRecordID":"created","TaskLogID":"created"},
+"vewAttendanceExceptionProcessed":{"RequestOptionCode":"created","ArrivalDepartureTime":"created","StartTime":"both","EndTime":"both","ApprovalStatus":"both"},
+"vewTaskLogExceptionCorrectionImport":{"CorrectionID":"created"},
+"vewActivitiesWorkSchedule_KEEPforUSP":{"ViewID":"created","YearTimestamp":"both","DailyTargets":"both","DailyTargetHours":"both","EntitledLeave":"created","StatutoryHoliday":"created","EntitledSickLeave":"created","LeaveAdjustment":"created"},
+"vewTaskLogCorrection_Latest":{"RowNumber":"both"},
+"vewActivitiesTimesheetMaster$App":{"TaskLogID":"both","ExtraBreakDuration":"both","StartTimeLagLead":"created","EndTimeLagLead":"created","ExceptionCode":"both","ExceptionDaysGap":"both","ExceptionTimeElapsed":"both","IsInvalidExceptionTimeRange":"created","OverallBreakDuration":"created"},
+"vewImportAttendanceExceptionLog":{"StartTime":"both","EndTime":"both","WeeklyTotalHours":"both","ReasonForException":"both","ReasonForExceptionOther":"both","Remarks":"both","MinutesToCredit_Import":"both","MinutesToCredit":"both","HoursCredit":"both","DaysCredit":"both","RowNumber":"created","DailyTotalMinutes":"created"},
+"vewTaskLogCorrection$App":{"CorrectionID":"created","IsCorrectionRequest":"created","TimestampBefore":"both","TimestampAfter":"both","Status":"both","HasError":"created","ExceptionTimeRange":"both","ExceptionCorrectionKey":"both","ExceptionSpec":"created","ExceptionCodeProcessed":"created"},
+"vewAttendanceException_TimeOff":{"ActivityDate":"both","RowNumber":"both"}
 /*__STATUS_END__*/
 };
 </script>
@@ -901,19 +901,18 @@ const STATUS_CREATED={
       row.title='Open '+o.obj+'’s dependency tree';
       const flag=o.nullable?'<span class="cflag nl">null</span>':'<span class="cflag nn">not&nbsp;null</span>';
       const st=statusOf(o.obj, selectedCol);
+      const stchip = st ? '<span class="strole '+st+'" title="'+STATUS_TITLE[st]+'">'+st+'</span>' : '';
       row.innerHTML='<span class="caret leaf">▶</span><span class="dot '+k+'"></span>'+
-        '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag+
-        '<span class="strole '+st+'" title="'+(st==='created'?'defined / computed in this object':'passed through from a source')+'">'+st+'</span>';
+        '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag+stchip;
       row.addEventListener('click',function(){ select(o.obj, selectedCol); });
       tree.appendChild(row);
     });
   }
+  const STATUS_TITLE={created:'defined / computed in this view',used:'passed through from a source',both:'both — computed AND passed through in this view'};
   function statusOf(obj, col){
-    if(kindOf(obj)==='view'){
-      const cr=(typeof STATUS_CREATED!=='undefined') ? STATUS_CREATED[obj] : null;
-      return (cr && cr.indexOf(col)>=0) ? 'created' : 'used';
-    }
-    return 'created';   // base / materialised tables: the column is defined here
+    if(kindOf(obj)!=='view') return null;          // status only for views (tables & procs ignored)
+    const m=(typeof STATUS!=='undefined') ? STATUS[obj] : null;
+    return (m && m[col]) ? m[col] : 'used';
   }
 
   // ---- tree ----
