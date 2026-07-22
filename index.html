@@ -658,7 +658,7 @@ const COLS={
     // U table
     return /^spt/i.test(name) ? 'staged' : 'table';
   }
-  const LEGACY=/(_DoNotUse|_WithTempTables|_KEEP|_01$|_Backup_\d)/i;
+  const LEGACY=/(_DoNotUse|_WithTempTables|_01$|_Backup_\d)/i;   // NB: no bare _KEEP — it wrongly matched the active *_KEEPforUSP views
   function isLegacy(n){ return LEGACY.test(n); }
 
   // ---- build graph ----
