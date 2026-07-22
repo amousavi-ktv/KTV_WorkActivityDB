@@ -94,6 +94,15 @@
     border-radius:20px;padding:1px 8px;font-variant-numeric:tabular-nums;}
   .row .ctype{font-family:var(--mono);color:var(--view);font-size:.76rem;margin-left:8px;}
   .row .cflag{font-size:.68rem;margin-left:6px;}
+  .row .strole{margin-left:auto;font-size:.64rem;font-weight:650;text-transform:uppercase;letter-spacing:.04em;
+    padding:1px 7px;border-radius:5px;white-space:nowrap;}
+  .strole.created{color:#23a565;border:1px solid color-mix(in srgb,#23a565 48%,transparent);
+    background:color-mix(in srgb,#23a565 14%,transparent);}
+  .strole.used{color:var(--faint);border:1px solid var(--border-strong);}
+  .row.colhdr2{font-family:var(--sans);color:var(--faint);font-size:.66rem;text-transform:uppercase;
+    letter-spacing:.06em;border-bottom:1px solid var(--border-strong);cursor:default;padding-bottom:5px;}
+  .row.colhdr2:hover{background:transparent;}
+  .row.colhdr2 .hstatus{margin-left:auto;}
   .objbtn.legacy .nm{opacity:.55;font-style:italic;}
   .star{color:var(--accent);font-size:.7rem;}
 
@@ -672,6 +681,52 @@ const DESCR={
 "uspUpdateExceptionCorrection":"Commits approved-but-uncommitted exception corrections in tblTaskLogExceptionCorrection (IsApproved set, IsCommitted=0); preview or update mode."
 /*__DESCR_END__*/
 };
+// Per view: which of its columns are CREATED here (not referenced from a source; else 'used').
+// From sys.dm_sql_referenced_entities — regenerate with build_dependency_tree.ps1
+const STATUS_CREATED={
+/*__STATUS_START__*/
+"vewActivitiesAttendance_KEEPforUSP":["ExtraBreakDuration","LunchBreakDuration","LunchBreakEndTime","LunchBreakStartTime","Rank","ViewID","WorkDuration","WorkEndTime","WorkStartTime"],
+"vewActivitiesAttendanceRecord_KEEPforUSP":["AdjustedWorkDailyBalance","Adjustment","Attendance","AttendanceRecordID","DailyStatus","DailyTarget","DatetimeFrom","DatetimeTo","StatusCode","SwapLogID","WorkDailyBalance","WorkDailyTarget"],
+"vewActivitiesProcessedSource_KEEPForUSP":["ActivitiesProcessedID","ActivityDate","ActivityDateOnOvernightTask","AdminKey","ConsecutiveDuplicateID","Duration_Seconds","ExceptionCode","ExceptionTaskLogID","IsActiveData","IsDayFirstEntry","IsDayLastEntry","IsFinishOption","IsOrphanOvernightTask","NextActivityTimestamp","NextPersonID","NextTask","NextTaskID","OvernightWorkStatus","PrevActivityTimestamp","PrevPersonID","PrevTask","PrevTaskID","SameDayNextTask","SameDayPrevTask"],
+"vewActivitiesTimesheetAnnualSummary":["AttendanceRecordID","TaskLogID"],
+"vewActivitiesTimesheetDetails$App":["Duration"],
+"vewActivitiesTimesheetExceptionCorrection$App":["ActivityTimestampAdjusted","AttendanceRecordID","EarlyMorningEndTime","EarlyMorningStartTime","IsDaySingleEntry","NormalEndTime","NormalStartTime","SameDayNextActivityTimestamp","SameDayPrevActivityTimestamp","StatusBarChangeComplete","StatusBarGoodToSubmit","StatusBarInitial","StatusBarInputError","StatusBarInputWarning"],
+"vewActivitiesTimesheetMaster$App":["DailyBalance","EndTimeLagLead","ExceptionDaysGap","ExceptionTimeElapsed","FirstActivityTime","IsInvalidExceptionTimeRange","LastActivityTime","OverallBreakDuration","StartTimeLagLead"],
+"vewActivitiesWorkSchedule_KEEPforUSP":["DailyTargetHours","DailyTargets","EntitledLeave","EntitledSickLeave","LeaveAdjustment","StatutoryHoliday","ViewID"],
+"vewActivitiesWorkScheduleMultipleEntries":["ActivityDate","ViewID"],
+"vewActivitiesWorkScheduleSingleEntry":["ActivityDate","ViewID"],
+"vewActivitiesWorkScheduleXAttendance":["ViewID","WorkTargetsExceptions"],
+"vewActivitiesWorkShcheduleSequence":["DateFrom","DateTo","WeeklyTargetHours"],
+"vewAdmin$App":["Admin_ID","RoleRemarks","ViewID"],
+"vewAttendanceException_Absence":["AbsenceCode","ActivityDate","DaysCount","ErrorMessage"],
+"vewAttendanceException_Swap":["AbsenceCode","ActivityDate","ErrorMessage","SwapInOut"],
+"vewAttendanceException_TimeOff":["AbsenceCode","ActivityDate","ErrorMessage","RowNumber"],
+"vewAttendanceExceptionApproval":["ProcessedByKey"],
+"vewAttendanceExceptionCategory":["CombinedRemarks","GroupRemarks"],
+"vewAttendanceExceptionLog$App":["ApprovalRemarks","ApprovalStatus","RequestorKey"],
+"vewAttendanceExceptionMenu$App":["GroupID","ViewID"],
+"vewAttendanceExceptionProcessed":["AbsenceCategory","ApprovalStatus","ArrivalDepartureTime","FK_AbsenceCode","RequestOptionCode"],
+"vewCalendar":["IsIgnoredCoreHour","IsReligiousHoliday","IsWorkDay","WorkTargetAdjustment"],
+"vewCalendar_AdjustedHijri":["AdjustedHijriDay","AdjustedHijriMonth","MoonSightingAdjustment","ReligiousHoliday"],
+"vewEmployeeWorkHistory":["fk_PersonID","FrequencySymbol"],
+"vewEmployeeWorkHistoryLatest":["RowNumber"],
+"vewHoliday":["HolidayType","HolidayTypeSymbol","IsReligiousHoliday"],
+"vewImportActivities":["fk_AdminID","fk_PersonID","fk_TaskID","IsAdminCorrection","TaskLogID"],
+"vewImportActivitiesCorrectionRequest":["CorrectionRequestTimestamp","CorrectionTask","ExceptionSpec","fk_AdminID","IsAdminCorrection","IsApproved","IsIgnoredException","Task_OriginalEnd","Task_OriginalStart","TaskID_OriginalEnd","TaskID_OriginalStart","WorkActivities"],
+"vewImportActivitiesExceptionsCorrection":["CorrectionRequestTimestamp","CorrectionTask","ExceptionSpec","fk_AdminID","IsAdminCorrection","IsApproved","Task_OriginalEnd","Task_OriginalStart","TaskID_OriginalEnd","TaskID_OriginalStart","WorkActivities"],
+"vewImportAttendanceExceptionApproval":["FK_LogID","IsApproved","RejectionReason","Remarks"],
+"vewImportAttendanceExceptionLog":["DailyTotalMinutes","DaysCredit","FK_CategoryID","FK_PersonID","FK_ProcessedByID","FK_RequestorID","HoursCredit","MinutesToCredit_Import","RowNumber"],
+"vewLegend$App":["LegendCode","LegendViewID"],
+"vewPerson$App":["RoleRemarks","ViewID"],
+"vewSearchAllViewsForString":["definition","schema","view_name"],
+"vewTaskLog_Recent$App":["AdminKey"],
+"vewTaskLogCorrection$App":["AdminKey","CorrectionID","ExceptionCodeCorrected","ExceptionCodeProcessed","ExceptionSpec","HasError","IsCorrectionRequest","Status","TimestampAfter","TimestampBefore"],
+"vewTaskLogCorrection_Latest":["RowNumber"],
+"vewTaskLogCount":["TaskCount","TaskRank"],
+"vewTaskLogExceptionCorrectionImport":["CorrectionID","ExceptionCodeCorrected","ExceptionCodeProcessed","ExceptionSpec","IsCorrectionRequest"],
+"vewTaskLogWithDuplicateFlag":["ConsecutiveDuplicateID","PrevShiftedDate","PrevTaskID","PrevTaskLogID","PrevTimestamp","ShiftedDate"]
+/*__STATUS_END__*/
+};
 </script>
 <script>
 (function(){
@@ -837,16 +892,28 @@ const DESCR={
     if(!holders.length){ tree.innerHTML='<div class="empty">No (non-legacy) object exposes this column.</div>'; return; }
     const ord={view:0,staged:1,table:2,proc:3};
     holders.sort(function(a,b){ const ka=kindOf(a.obj), kb=kindOf(b.obj); return ka===kb ? a.obj.localeCompare(b.obj) : ord[ka]-ord[kb]; });
+    const hdr=document.createElement('div'); hdr.className='row colhdr2';
+    hdr.innerHTML='<span class="caret leaf">▶</span><span class="label">object</span><span class="hstatus">status</span>';
+    tree.appendChild(hdr);
     holders.forEach(function(o){
       const k=kindOf(o.obj);
       const row=document.createElement('div'); row.className='row clickable';
       row.title='Open '+o.obj+'’s dependency tree';
       const flag=o.nullable?'<span class="cflag nl">null</span>':'<span class="cflag nn">not&nbsp;null</span>';
+      const st=statusOf(o.obj, selectedCol);
       row.innerHTML='<span class="caret leaf">▶</span><span class="dot '+k+'"></span>'+
-        '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag;
+        '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag+
+        '<span class="strole '+st+'" title="'+(st==='created'?'defined / computed in this object':'passed through from a source')+'">'+st+'</span>';
       row.addEventListener('click',function(){ select(o.obj, selectedCol); });
       tree.appendChild(row);
     });
+  }
+  function statusOf(obj, col){
+    if(kindOf(obj)==='view'){
+      const cr=(typeof STATUS_CREATED!=='undefined') ? STATUS_CREATED[obj] : null;
+      return (cr && cr.indexOf(col)>=0) ? 'created' : 'used';
+    }
+    return 'created';   // base / materialised tables: the column is defined here
   }
 
   // ---- tree ----
