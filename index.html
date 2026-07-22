@@ -122,6 +122,11 @@
   .counts{margin-left:auto;display:flex;gap:14px;font-size:.8rem;color:var(--muted);
     font-variant-numeric:tabular-nums;}
   .counts b{color:var(--text);}
+  .seldesc{padding:10px 18px 12px;color:var(--muted);font-size:.86rem;line-height:1.5;
+    border-bottom:1px solid var(--border);background:var(--panel-2);}
+  .seldesc:empty{display:none;}
+  .seldesc .dtag{font-size:.6rem;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);
+    margin-right:8px;vertical-align:1px;}
   .treeactions{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);
     background:var(--panel-2);}
   .treeactions button{border:1px solid var(--border-strong);background:var(--surface);
@@ -225,6 +230,7 @@
     <div class="main">
       <div class="panelcard">
         <div class="selhead" id="selhead"></div>
+        <div class="seldesc" id="seldesc"></div>
         <div class="colsbox" id="colsbox"></div>
         <div class="treeactions">
           <button id="expandAll">Expand all</button>
@@ -647,6 +653,25 @@ const COLS={
 "vewUserGrade$App":[["UserGradeID","int",0],["fk_PersonID","int",0],["fk_MenuItemID","int",0],["MenuText","varchar(100)",1],["RequiredTag","varchar(50)",1],["UrlPattern","varchar(200)",1],["IsActive","bit",1]]
 /*__COLS_END__*/
 };
+// Object descriptions from sys.extended_properties (MS_Description) — regenerate with build_dependency_tree.ps1
+const DESCR={
+/*__DESCR_START__*/
+"uspAddHijriAdjustment":"Adds or updates a manual day-shift for a Hijri month (e.g. Ramadan starting a day late) in sptCalendar_HijriAdjustments; validates the date is the 1st of an existing Hijri month.",
+"uspClearHijriAdjustments":"Removes all manual Hijri calendar adjustments (truncates sptCalendar_HijriAdjustments).",
+"uspCreateAndPopulateCalendar":"Creates and populates a general Gregorian calendar table for a year range (parameterised table name, optional drop-existing).",
+"uspImportActivitiesAndDependencies":"Full-reload import of task-log activities and their exception/correction rows from the staging import tables into tblTaskLog and tblTaskLogExceptionCorrection; reports and records source Tasks/Persons missing from tblTask/tblPerson.",
+"uspImportAttendanceExceptionAndDependencies":"Imports attendance-exception logs and their approvals from the import views into tblAttendanceExceptionLog and tblAttendanceExceptionApproval.",
+"uspPopulateBankHolidayCalendar":"Rebuilds sptBankHoliday_UK from the England-and-Wales bank-holidays JSON file (G:\\AppServer\\bank-holidays.json).",
+"uspPopulateHijriCalendar":"Rebuilds sptCalendar_Hijri for a Hijri year range by generating Gregorian dates and converting them to Hijri (ar-SA).",
+"uspRefreshActivities_ALL":"Master activity refresh: runs the four refresh procs in sequence (WorkSchedule, ProcessedSource, Attendance, AttendanceRecord); supports preview mode.",
+"uspRefreshActivitiesAttendance":"Rebuilds the materialised sptActivitiesAttendance from vewActivitiesAttendance_KEEPforUSP (transactional, logged, auto-backup, preview mode).",
+"uspRefreshActivitiesAttendanceRecord":"Rebuilds the materialised sptActivitiesAttendanceRecord from vewActivitiesAttendanceRecord_KEEPforUSP.",
+"uspRefreshActivitiesProcessedSource":"Rebuilds sptActivitiesProcessedSource (the corrected equivalent of tblTaskLog) from vewActivitiesProcessedSource_KEEPForUSP, and flags new exceptions (E03/W04/W05/W12).",
+"uspRefreshActivitiesWorkSchedule":"Rebuilds the materialised sptActivitiesWorkSchedule from vewActivitiesWorkSchedule_KEEPforUSP.",
+"uspRefreshAllViews":"Re-refreshes every view metadata via sp_refreshview over multiple passes (settles nested view-on-view dependencies); continue-on-error or all-or-nothing.",
+"uspUpdateExceptionCorrection":"Commits approved-but-uncommitted exception corrections in tblTaskLogExceptionCorrection (IsApproved set, IsCommitted=0); preview or update mode."
+/*__DESCR_END__*/
+};
 </script>
 <script>
 (function(){
@@ -936,8 +961,15 @@ const COLS={
   }
 
   function renderMain(){
-    if(mode==='objects'){ renderHead(); renderCols(); renderTree(); }
-    else { renderColumnDetail(); }
+    if(mode==='objects'){ renderHead(); renderDesc(); renderCols(); renderTree(); }
+    else { document.getElementById('seldesc').textContent=''; renderColumnDetail(); }
+  }
+  function renderDesc(){
+    const el=document.getElementById('seldesc'); el.textContent='';
+    const d=(typeof DESCR!=='undefined' && selected) ? DESCR[selected] : null;
+    if(!d) return;
+    const tag=document.createElement('span'); tag.className='dtag'; tag.textContent='description';
+    el.appendChild(tag); el.appendChild(document.createTextNode(d));
   }
   function syncModeUI(){
     document.getElementById('modeObjects').setAttribute('aria-pressed', mode==='objects');
