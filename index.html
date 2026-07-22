@@ -90,6 +90,10 @@
   .objbtn.active{background:var(--accent-soft);color:var(--text);font-weight:600;}
   .objbtn .dot{margin-top:4px;}
   .objbtn .nm{flex:1;white-space:normal;overflow-wrap:anywhere;}
+  .objbtn .cnt{margin-left:auto;flex:none;font-size:.66rem;color:var(--muted);background:var(--panel);
+    border-radius:20px;padding:1px 8px;font-variant-numeric:tabular-nums;}
+  .row .ctype{font-family:var(--mono);color:var(--view);font-size:.76rem;margin-left:8px;}
+  .row .cflag{font-size:.68rem;margin-left:6px;}
   .objbtn.legacy .nm{opacity:.55;font-style:italic;}
   .star{color:var(--accent);font-size:.7rem;}
 
@@ -184,7 +188,7 @@
   <header class="top">
     <div class="titleblock">
       <h1>Database Object Dependency Explorer</h1>
-      <p>Every table, view and stored procedure in <b>WorkActivities_DEV_CLAUDE</b> and how they reference one another — view/proc references from <code style="font-family:var(--mono);font-size:.85em">sys.sql_expression_dependencies</code>, plus table→table foreign keys from <code style="font-family:var(--mono);font-size:.85em">sys.foreign_keys</code>. Select any table or view to see its columns.</p>
+      <p>Every table, view and stored procedure in <b>WorkActivities_DEV_CLAUDE</b> and how they reference one another — view/proc references from <code style="font-family:var(--mono);font-size:.85em">sys.sql_expression_dependencies</code>, plus table→table foreign keys from <code style="font-family:var(--mono);font-size:.85em">sys.foreign_keys</code>. Select any table or view to see its columns, or switch to <b>Columns</b> to find which views/tables contain a given column.</p>
     </div>
     <div class="stats" id="stats"></div>
   </header>
@@ -194,11 +198,15 @@
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="search" type="text" placeholder="filter objects…" autocomplete="off" spellcheck="false">
     </label>
-    <div class="seg" role="group" aria-label="Direction">
+    <div class="seg" role="group" aria-label="Browse mode">
+      <button id="modeObjects" aria-pressed="true">Objects</button>
+      <button id="modeColumns" aria-pressed="false">Columns</button>
+    </div>
+    <div class="seg" id="dirSeg" role="group" aria-label="Direction">
       <button id="dirDown" aria-pressed="true">Depends on ↓</button>
       <button id="dirUp" aria-pressed="false">Used by ↑</button>
     </div>
-    <label class="toggle"><input type="checkbox" id="showFK" checked> show FK links</label>
+    <label class="toggle" id="showFKlabel"><input type="checkbox" id="showFK" checked> show FK links</label>
     <label class="toggle"><input type="checkbox" id="hideLegacy" checked> hide legacy / _DoNotUse</label>
   </div>
 
@@ -642,7 +650,7 @@ const COLS={
     // U table
     return /^spt/i.test(name) ? 'staged' : 'table';
   }
-  const LEGACY=/(_DoNotUse|_WithTempTables|_KEEP|_01$)/i;
+  const LEGACY=/(_DoNotUse|_WithTempTables|_KEEP|_01$|_Backup_\d)/i;
   function isLegacy(n){ return LEGACY.test(n); }
 
   // ---- build graph ----
@@ -684,11 +692,25 @@ const COLS={
   function degOut(n){ return edgeCount(n,'down'); }
   function degIn(n){ return edgeCount(n,'up'); }
 
+  // ---- column index: columnName -> [{obj, type, nullable}] (inverted from COLS) ----
+  function kindOf(name){ const n=nodes.get(name); if(n) return n.kind; if(/^vew/i.test(name)) return 'view'; if(/^spt/i.test(name)) return 'staged'; return 'table'; }
+  const COL_INDEX={};
+  if(typeof COLS!=='undefined'){
+    Object.keys(COLS).forEach(function(obj){
+      (COLS[obj]||[]).forEach(function(c){
+        if(!COL_INDEX[c[0]]) COL_INDEX[c[0]]=[];
+        COL_INDEX[c[0]].push({obj:obj, type:c[1], nullable:c[2]});
+      });
+    });
+  }
+
   // ---- state ----
   let dir='down';
   let hideLegacy=true;
   let showFK=true;
   let selected=null;
+  let mode='objects';     // 'objects' | 'columns'
+  let selectedCol=null;
 
   // ---- stats ----
   (function(){
@@ -717,6 +739,7 @@ const COLS={
     return true;
   }
   function renderSidebar(){
+    if(mode==='columns') return renderColumnList();
     const q=document.getElementById('search').value.trim().toLowerCase();
     const host=document.getElementById('objlist');
     host.innerHTML='';
@@ -743,6 +766,52 @@ const COLS={
         b.addEventListener('click',()=>select(n.name));
         host.appendChild(b);
       });
+    });
+  }
+
+  function renderColumnList(){
+    const q=document.getElementById('search').value.trim().toLowerCase();
+    const host=document.getElementById('objlist');
+    host.innerHTML='';
+    let names=Object.keys(COL_INDEX).filter(function(cn){
+      if(q && cn.toLowerCase().indexOf(q)<0) return false;
+      return COL_INDEX[cn].some(function(o){ return !(hideLegacy && isLegacy(o.obj)); });
+    }).sort(function(a,b){ return a.localeCompare(b); });
+    const lab=document.createElement('div'); lab.className='grouplabel';
+    lab.innerHTML='<span>Columns</span><span class="ct">'+names.length+'</span>';
+    host.appendChild(lab);
+    names.forEach(function(cn){
+      const cnt=COL_INDEX[cn].filter(function(o){ return !(hideLegacy && isLegacy(o.obj)); }).length;
+      const b=document.createElement('button');
+      b.className='objbtn'+(selectedCol===cn?' active':'');
+      b.innerHTML='<span class="nm">'+cn+'</span><span class="cnt" title="in '+cnt+' object(s)">'+cnt+'</span>';
+      b.addEventListener('click',function(){ selectColumn(cn); });
+      host.appendChild(b);
+    });
+  }
+
+  function renderColumnDetail(){
+    const head=document.getElementById('selhead');
+    const tree=document.getElementById('tree');
+    if(!selectedCol){ head.innerHTML='<span style="color:var(--muted);font-size:.9rem">Pick a column on the left</span>'; tree.innerHTML=''; return; }
+    const holders=COL_INDEX[selectedCol].filter(function(o){ return !(hideLegacy && isLegacy(o.obj)); });
+    head.innerHTML=
+      '<span class="name"><span class="nm">'+selectedCol+'</span></span>'+
+      '<span class="kindtag view">column</span>'+
+      '<span class="counts"><span>in <b>'+holders.length+'</b> object'+(holders.length===1?'':'s')+'</span></span>';
+    tree.innerHTML='';
+    if(!holders.length){ tree.innerHTML='<div class="empty">No (non-legacy) object exposes this column.</div>'; return; }
+    const ord={view:0,staged:1,table:2,proc:3};
+    holders.sort(function(a,b){ const ka=kindOf(a.obj), kb=kindOf(b.obj); return ka===kb ? a.obj.localeCompare(b.obj) : ord[ka]-ord[kb]; });
+    holders.forEach(function(o){
+      const k=kindOf(o.obj);
+      const row=document.createElement('div'); row.className='row clickable';
+      row.title='Open '+o.obj+'’s dependency tree';
+      const flag=o.nullable?'<span class="cflag nl">null</span>':'<span class="cflag nn">not&nbsp;null</span>';
+      row.innerHTML='<span class="caret leaf">▶</span><span class="dot '+k+'"></span>'+
+        '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag;
+      row.addEventListener('click',function(){ select(o.obj); });
+      tree.appendChild(row);
     });
   }
 
@@ -802,6 +871,7 @@ const COLS={
       dir==='down' ? 'arrows point to what each object reads / calls' : 'arrows point to what reads / calls each object';
     if(!selected){ host.innerHTML='<div class="empty">Pick an object on the left to trace its dependencies.</div>'; return; }
     const rootNode=nodes.get(selected);
+    if(!rootNode){ host.innerHTML='<div class="empty"><b>'+selected+'</b> has no dependency edges — it isn\'t referenced by, and doesn\'t reference, any other object.</div>'; return; }
     const root=makeRow(rootNode,0,new Set(),dir,null);
     host.appendChild(root);
     // auto-open first level
@@ -813,6 +883,7 @@ const COLS={
     const el=document.getElementById('selhead');
     if(!selected){ el.innerHTML='<span style="color:var(--muted);font-size:.9rem">No object selected</span>'; return; }
     const n=nodes.get(selected);
+    if(!n){ el.innerHTML='<span class="name"><span class="dot '+kindOf(selected)+'"></span><span class="nm">'+selected+'</span></span><span class="kindtag '+kindOf(selected)+'">'+kindOf(selected)+'</span><span class="counts">no dependency edges</span>'; return; }
     const kl={proc:'Stored proc',view:'View',table:'Base table',staged:'Materialised table'}[n.kind];
     el.innerHTML=
       '<span class="name"><span class="dot '+n.kind+'"></span><span class="nm">'+n.name+'</span></span>'+
@@ -845,19 +916,44 @@ const COLS={
     box.appendChild(bar); box.appendChild(grid);
   }
 
+  function renderMain(){
+    if(mode==='objects'){ renderHead(); renderCols(); renderTree(); }
+    else { renderColumnDetail(); }
+  }
+  function syncModeUI(){
+    document.getElementById('modeObjects').setAttribute('aria-pressed', mode==='objects');
+    document.getElementById('modeColumns').setAttribute('aria-pressed', mode==='columns');
+    document.getElementById('search').placeholder = (mode==='columns') ? 'filter columns…' : 'filter objects…';
+    const objMode = (mode==='objects');
+    document.getElementById('dirSeg').style.display = objMode ? '' : 'none';
+    document.getElementById('showFKlabel').style.display = objMode ? '' : 'none';
+    document.querySelector('.treeactions').style.display = objMode ? '' : 'none';
+    document.getElementById('colsbox').style.display = objMode ? '' : 'none';
+  }
   function select(name){
-    selected=name;
-    renderSidebar(); renderHead(); renderCols(); renderTree();
+    mode='objects'; selected=name;
+    syncModeUI(); renderSidebar(); renderMain();
+  }
+  function selectColumn(col){
+    mode='columns'; selectedCol=col;
+    syncModeUI(); renderSidebar(); renderMain();
+  }
+  function setMode(m){
+    mode=m;
+    if(m==='columns' && !selectedCol){ const ks=Object.keys(COL_INDEX).sort(function(a,b){return a.localeCompare(b);}); selectedCol=ks[0]||null; }
+    syncModeUI(); renderSidebar(); renderMain();
   }
 
   // ---- wiring ----
   document.getElementById('search').addEventListener('input',renderSidebar);
   document.getElementById('hideLegacy').addEventListener('change',function(e){
-    hideLegacy=e.target.checked; renderSidebar(); renderTree();
+    hideLegacy=e.target.checked; renderSidebar(); renderMain();
   });
   document.getElementById('showFK').addEventListener('change',function(e){
-    showFK=e.target.checked; renderSidebar(); renderHead(); renderTree();
+    showFK=e.target.checked; renderSidebar(); renderMain();
   });
+  document.getElementById('modeObjects').addEventListener('click',function(){ setMode('objects'); });
+  document.getElementById('modeColumns').addEventListener('click',function(){ setMode('columns'); });
   function setDir(d){
     dir=d;
     document.getElementById('dirDown').setAttribute('aria-pressed',d==='down');
