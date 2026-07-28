@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>App Page &#8596; Database Matrix &mdash; WorkActivities</title>
+<style>
+  :root{
+    --bg:#eef0f3; --surface:#ffffff; --panel:#e7eaee; --panel-2:#f3f5f7;
+    --border:#d6dae0; --border-strong:#c2c8d0;
+    --text:#1c2430; --muted:#5d6774; --faint:#8a93a0; --label:#284a80;
+    --accent:#2f6db0; --accent-soft:#dbe7f5;
+    --view:#1f8a99; --view-soft:#d7f0f2; --table:#b06d24; --table-soft:#f6e6d2;
+    --write:#b23b4b; --write-soft:#f6dbdf;
+    --shadow:0 1px 2px rgba(20,30,45,.06),0 6px 20px rgba(20,30,45,.06);
+    --mono:ui-monospace,"Cascadia Mono","Consolas",Menlo,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12151a; --surface:#191d24; --panel:#1e232b; --panel-2:#161a20;
+      --border:#2a313b; --border-strong:#3a424e;
+      --text:#e4e8ee; --muted:#98a2b0; --faint:#6b7482; --label:#9cbbe6;
+      --accent:#6aa1db; --accent-soft:#22344a;
+      --view:#48c0d0; --view-soft:#123037; --table:#d69b58; --table-soft:#33260f;
+      --write:#e0788a; --write-soft:#3a1a20;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 26px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#eef0f3; --surface:#ffffff; --panel:#e7eaee; --panel-2:#f3f5f7;
+    --border:#d6dae0; --border-strong:#c2c8d0;
+    --text:#1c2430; --muted:#5d6774; --faint:#8a93a0; --label:#284a80;
+    --accent:#2f6db0; --accent-soft:#dbe7f5;
+    --view:#1f8a99; --view-soft:#d7f0f2; --table:#b06d24; --table-soft:#f6e6d2;
+    --write:#b23b4b; --write-soft:#f6dbdf;
+    --shadow:0 1px 2px rgba(20,30,45,.06),0 6px 20px rgba(20,30,45,.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#12151a; --surface:#191d24; --panel:#1e232b; --panel-2:#161a20;
+    --border:#2a313b; --border-strong:#3a424e;
+    --text:#e4e8ee; --muted:#98a2b0; --faint:#6b7482; --label:#9cbbe6;
+    --accent:#6aa1db; --accent-soft:#22344a;
+    --view:#48c0d0; --view-soft:#123037; --table:#d69b58; --table-soft:#33260f;
+    --write:#e0788a; --write-soft:#3a1a20;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 26px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%;}
+  header{padding:18px 20px 10px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;
+    border-bottom:1px solid var(--border);background:var(--panel-2);}
+  .titleblock h1{margin:0;color:var(--label);font-size:clamp(1.2rem,2.4vw,1.55rem);font-weight:700;}
+  .titleblock p{margin:.3rem 0 0;color:var(--muted);font-size:.86rem;max-width:70ch;}
+  .titleblock a{color:var(--accent);text-decoration:none;font-weight:600;}
+  .titleblock a:hover{text-decoration:underline;}
+  .stats{display:flex;gap:18px;margin-left:auto;}
+  .stat b{display:block;color:var(--label);font-size:1.2rem;font-variant-numeric:tabular-nums;font-weight:700;}
+  .stat span{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:650;}
+  .controls{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    padding:10px 20px;background:var(--panel-2);border-bottom:1px solid var(--border);}
+  .seg{display:flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;background:var(--surface);}
+  .seg button{border:0;background:transparent;color:var(--muted);padding:7px 14px;font-weight:600;cursor:pointer;font-size:.85rem;}
+  .seg button.active{background:var(--accent);color:#fff;}
+  .search{flex:1;min-width:200px;}
+  .search input{width:100%;padding:8px 12px;border:1px solid var(--border-strong);background:var(--surface);
+    color:var(--text);border-radius:8px;font-size:.9rem;font-family:var(--mono);}
+  .search input:focus{outline:2px solid var(--accent);border-color:var(--accent);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);border-radius:999px;
+    padding:5px 11px;font-size:.78rem;cursor:pointer;font-weight:600;}
+  .chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--label);}
+  .themebtn{border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);border-radius:8px;
+    padding:7px 10px;cursor:pointer;font-size:.9rem;}
+  main{padding:16px 20px 60px;}
+  .hint{color:var(--faint);font-size:.8rem;margin:0 0 10px;}
+  /* pages table */
+  .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);background:var(--surface);}
+  table{border-collapse:collapse;width:100%;min-width:820px;}
+  thead th{position:sticky;top:56px;background:var(--panel);color:var(--label);text-align:left;
+    font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;padding:9px 12px;border-bottom:1px solid var(--border-strong);white-space:nowrap;}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:hover{background:var(--panel-2);}
+  .pagename{font-weight:700;color:var(--text);}
+  .opened{color:var(--muted);font-size:.78rem;font-family:var(--mono);margin-top:2px;}
+  .codecell{font-family:var(--mono);font-size:.78rem;color:var(--muted);}
+  .codecell .lbl{color:var(--faint);text-transform:uppercase;font-size:.62rem;letter-spacing:.05em;display:block;margin:5px 0 1px;}
+  .codecell .val{color:var(--text);}
+  .areabadge{display:inline-block;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--label);
+    font-size:.72rem;font-weight:650;white-space:nowrap;}
+  .pills{display:flex;flex-wrap:wrap;gap:5px;}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:.76rem;
+    font-family:var(--mono);cursor:pointer;border:1px solid transparent;white-space:nowrap;}
+  .pill.view{background:var(--view-soft);color:var(--view);border-color:var(--view);}
+  .pill.table{background:var(--table-soft);color:var(--table);border-color:var(--table);}
+  .pill.write{background:var(--write-soft);color:var(--write);border-color:var(--write);}
+  .pill .wb{font-size:.6rem;font-weight:800;letter-spacing:.03em;opacity:.85;}
+  .pill:hover{outline:2px solid var(--accent);outline-offset:1px;}
+  .notes{color:var(--muted);font-size:.8rem;margin-top:6px;}
+  .notestoggle{cursor:pointer;color:var(--accent);font-size:.75rem;font-weight:600;user-select:none;}
+  /* objects view */
+  .objgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;}
+  .objcard{border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--shadow);padding:12px 13px;}
+  .objcard h3{margin:0 0 2px;font-size:.95rem;font-family:var(--mono);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .kindtag{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:2px 7px;border-radius:5px;font-family:var(--sans);}
+  .kindtag.view{background:var(--view-soft);color:var(--view);}
+  .kindtag.table{background:var(--table-soft);color:var(--table);}
+  .objcard .cls{color:var(--muted);font-size:.76rem;font-family:var(--mono);}
+  .objcard .desc{color:var(--muted);font-size:.8rem;margin:4px 0 8px;}
+  .uselist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
+  .uselist li{display:flex;gap:8px;align-items:center;font-size:.82rem;}
+  .rw{font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:4px;letter-spacing:.03em;}
+  .rw.read{background:var(--accent-soft);color:var(--label);}
+  .rw.write{background:var(--write-soft);color:var(--write);}
+  .empty{color:var(--faint);padding:30px;text-align:center;font-style:italic;}
+  footer{color:var(--faint);font-size:.75rem;padding:0 20px 30px;}
+  mark{background:#ffe58a;color:inherit;padding:0 1px;border-radius:2px;}
+  @media (prefers-color-scheme: dark){mark{background:#7a5a12;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="titleblock">
+    <h1>App Page &#8596; Database Matrix</h1>
+    <p>Which SQL Server <b>views</b> each app page reads and which <b>tables</b> it writes. Hand-curated
+       from the code &middot; generated <b>2026-07-28</b>. Companion to the
+       <a href="https://amousavi-ktv.github.io/KTV_WorkActivityDB/" target="_blank" rel="noopener">DB Object Dependency Explorer &#8599;</a>.
+       Click any object to see every page that touches it.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="sPages">0</b><span>Pages</span></div>
+    <div class="stat"><b id="sViews">0</b><span>Views</span></div>
+    <div class="stat"><b id="sTables">0</b><span>Tables</span></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="seg" id="viewToggle">
+    <button data-view="pages" class="active">Pages</button>
+    <button data-view="objects">By DB object</button>
+  </div>
+  <div class="search"><input id="q" type="search" placeholder="Filter pages, views, tables, templates&hellip;" autocomplete="off"></div>
+  <div class="chips" id="areaChips"></div>
+  <button class="themebtn" id="themeBtn" title="Toggle light / dark">&#9788;</button>
+</div>
+
+<main>
+  <p class="hint" id="hint"></p>
+  <div id="pagesView" class="tablewrap"></div>
+  <div id="objectsView" class="objgrid" hidden></div>
+  <div class="empty" id="noResults" hidden>No matches.</div>
+</main>
+
+<footer>
+  Self-contained &middot; regenerate with <code>TimesheetApp\Docs\build_db_matrix.py</code> &middot;
+  publish with <code>publish_page_matrix.ps1</code>. Object &amp; page names only &mdash; no data.
+</footer>
+
+<script>
+const DATA = {"pages": [{"area": "Actions / Admin", "page": "My Dashboard - Staff", "opened": "Dropdown -> /dashboard/staff/", "master": ["dashboard_staff_master.html"], "fragments": ["form fragment via dashboard_staff_form"], "forms": ["forms_dashboard_staff.py (TaskSelectionFormStaff)"], "modules": ["dashboards/views_dashboard_staff_master.py", "dashboard_common.py", "staff_break_rules.py"], "views": [{"name": "vewTaskLog_Recent$App", "note": "", "write": false}, {"name": "vewTask$App", "note": "", "write": false}, {"name": "vewTaskLog$App", "note": "", "write": false}, {"name": "vewTaskLogsAndCorrections$App", "note": "", "write": false}], "tables": [{"name": "tblTaskLog", "note": "(write)", "write": true}, {"name": "tblTask", "note": "", "write": false}], "notes": "Logs task at current time; duplicate check via vewTaskLogsAndCorrections$App; BREAK rules apply"}, {"area": "Actions / Admin", "page": "My Dashboard - Supervisor", "opened": "Dropdown -> /dashboard/supervisor/", "master": ["dashboard_supervisor_master.html"], "fragments": ["form fragment via dashboard_supervisor_form"], "forms": ["forms_dashboard_supervisor.py (TaskSelectionFormSupervisor)"], "modules": ["dashboards/views_dashboard_supervisor_master.py", "dashboard_common.py"], "views": [{"name": "vewTaskLog_Recent$App", "note": "", "write": false}, {"name": "vewPerson$App", "note": "", "write": false}, {"name": "vewTaskLogsAndCorrections$App", "note": "", "write": false}], "tables": [{"name": "tblTaskLog", "note": "(write)", "write": true}, {"name": "tblTask", "note": "", "write": false}], "notes": "Can backdate (custom date/time)"}, {"area": "Admin", "page": "Admin Dashboard / Users Activities Management", "opened": "Admin dropdown -> /dashboard/admin/", "master": ["dashboard_admin_master.html"], "fragments": ["form fragment via dashboard_admin_form"], "forms": ["forms_dashboard_admin.py (AdminTimesheetForm)"], "modules": ["dashboards/views_dashboard_admin_master.py"], "views": [{"name": "vewTaskLog_Recent$App", "note": "", "write": false}, {"name": "vewPerson$App", "note": "", "write": false}], "tables": [{"name": "tblTaskLog", "note": "(write)", "write": true}, {"name": "tblPerson", "note": "", "write": false}, {"name": "tblTask", "note": "", "write": false}], "notes": "Logs on behalf of any person; is_admin_correction=True"}, {"area": "Actions / Admin", "page": "Activities (Master) - Full & Brief", "opened": "Dropdown -> /activities-timesheet/ , /activities-timesheet-brief/", "master": ["activities_master_master.html", "activities_master_master_brief.html"], "fragments": [], "forms": ["(exception forms loaded on demand - see Exception Correction pages)"], "modules": ["views_activities_master_master.py"], "views": [{"name": "vewActivitiesTimesheetMaster$App", "note": "", "write": false}, {"name": "vewActivitiesTimesheetDetails$App", "note": "", "write": false}, {"name": "vewActivitiesTimesheetExceptionCorrection$App", "note": "", "write": false}, {"name": "vewLegend$App", "note": "", "write": false}], "tables": [], "notes": "Exception column links to the Exception Correction pages (E03/W04/W05/W12)"}, {"area": "Actions / Admin", "page": "Activities (Details)", "opened": "Dropdown -> /timesheet-details/", "master": ["activities_details_master.html"], "fragments": [], "forms": [], "modules": ["views_activities_details_master.py"], "views": [{"name": "vewActivitiesTimesheetDetails$App", "note": "", "write": false}], "tables": [], "notes": "Read-only drill-down"}, {"area": "Actions / Admin", "page": "Activities Change Request - Generic / Missing Day Entries / Sequence Gap (R01 / W10 / S01)", "opened": "Dropdown -> /timesheet-change-request/?correction=R01|W10|S01 (Admin adds view=all)", "master": ["activities_change_request_master.html"], "fragments": ["activities_change_request_R01.html", "_W10.html", "_S01.html"], "forms": ["forms_activities_change_request_R01.py", "_W10.py", "_S01.py"], "modules": ["views_activities_change_request_master.py", "views_activities_correction_handlers.py"], "views": [{"name": "vewTask$App", "note": "", "write": false}, {"name": "vewPerson$App", "note": "(Select2 search)", "write": false}], "tables": [{"name": "tblTaskLogExceptionCorrection", "note": "(write", "write": true}], "notes": "is_approved NULL/0 until an admin processes the request"}, {"area": "Actions / Admin", "page": "Activities Correction History", "opened": "Dropdown -> /exception-history/", "master": ["activities_correction_history_master.html"], "fragments": ["activities_correction_history_details.html"], "forms": [], "modules": ["views_activities_correction_history_master.py"], "views": [{"name": "vewTaskLogCorrection$App", "note": "", "write": false}], "tables": [], "notes": "History + drill-down"}, {"area": "Admin", "page": "Users Activities Change Request Management (Correction Approval)", "opened": "Admin dropdown -> /correction-approval/", "master": ["activities_correction_approval_master.html"], "fragments": ["activities_correction_approval_form.html"], "forms": ["forms_activities_correction_approval.py (CorrectionApprovalForm)"], "modules": ["views_activities_correction_approval_master.py"], "views": [{"name": "vewTaskLogCorrection$App", "note": "(pending grid: IsApprovalLogged NULL/0)", "write": false}], "tables": [{"name": "tblTaskLogExceptionCorrection", "note": "(write is_approved + app_remarks + date_processed)", "write": true}], "notes": "Approves/declines both correction requests and exception corrections; overnight sets IsCommitted=1"}, {"area": "Actions / Admin", "page": "Attendance Exceptions", "opened": "Dropdown -> /attendance-exception/", "master": ["attendance_exception_master.html"], "fragments": ["attendance_exception_form.html"], "forms": ["forms_attendance_exception.py (DynamicAttendanceExceptionForm)"], "modules": ["views_attendance_exception_master.py"], "views": [{"name": "vewAttendanceExceptionMenu$App", "note": "", "write": false}, {"name": "vewAttendanceExceptionLog$App", "note": "(history)", "write": false}, {"name": "vewPerson$App", "note": "", "write": false}], "tables": [{"name": "tblAttendanceExceptionLog", "note": "(write)", "write": true}, {"name": "tblAttendanceExceptionCategory", "note": "", "write": false}, {"name": "tblPerson", "note": "", "write": false}], "notes": "Dynamic, category-driven fields"}, {"area": "Admin", "page": "Users Attendance Exception Management", "opened": "Admin dropdown -> /attendance-exception-request-approval/", "master": ["attendance_exception_request_approval_master.html"], "fragments": ["attendance_exception_request_approval_form.html"], "forms": ["forms_attendance_exception_request_approval.py"], "modules": ["views_attendance_exception_request_approval_master.py"], "views": [{"name": "vewAttendanceExceptionLog$App", "note": "", "write": false}], "tables": [{"name": "tblAttendanceExceptionApproval", "note": "(write, get_or_create)", "write": true}], "notes": "Approve / decline attendance exception requests"}, {"area": "Exception column", "page": "Exception Correction pages (E03 / W04 / W05 / W12)", "opened": "Click the Exception column on Activities (Master - Full/Brief) -> /exception/?code=<CODE>", "master": ["activities_exception_master.html (shell)"], "fragments": ["activities_exception_E03.html", "_W04.html", "_W05.html", "_W12.html (via /exception/module/<code>/)"], "forms": ["forms_activities_exception_E03.py", "_W04.py", "_W05.py", "_W12.py"], "modules": ["views_activities_exception_master.py", "views_activities_exception_handlers.py", "get_exception_module() in views_activities_master_master.py"], "views": [{"name": "vewTaskLog$App", "note": "(original task-log lookup)", "write": false}, {"name": "vewActivitiesTimesheetExceptionCorrection$App", "note": "(feeding grids)", "write": false}], "tables": [{"name": "tblTaskLogExceptionCorrection", "note": "(write)", "write": true}, {"name": "tblTask", "note": "", "write": false}], "notes": "Not in any dropdown; reached only from the Exception column. E03=Missing Day End, W04=Break at Day Start-No Subsequent Tasks, W05=Continuous Work >6h, W12=Duplicate Consecutive Task"}, {"area": "API", "page": "REST API - tasklog (/api/v1/tasklog/)", "opened": "DRF router (GET/POST/PUT/PATCH/DELETE)", "master": [], "fragments": [], "forms": ["serializers.py (TaskLogRead/WriteSerializer)"], "modules": ["api_views.py", "api_urls.py"], "views": [{"name": "vewTaskLog_Recent$App", "note": "(read)", "write": false}], "tables": [{"name": "tblTaskLog", "note": "(write/delete)", "write": true}], "notes": "Filters: fk_personID, year, from, to"}, {"area": "Actions", "page": "Export to Google Sheets", "opened": "/export-to-gsheet/ , /transfer-views/", "master": ["dashboard_export.html (referenced)"], "fragments": [], "forms": [], "modules": ["views.py"], "views": [{"name": "vewTransferViewToGoogleSheet$App", "note": "", "write": false}], "tables": [], "notes": "Google Sheets export"}, {"area": "System (cross-cutting)", "page": "Auth / roles / permissions / menus / legend / settings", "opened": "Every request (middleware, context processors, ACL)", "master": ["base.html", "partials/*dropdown*.html"], "fragments": [], "forms": [], "modules": ["middleware.py", "pipeline.py", "backends.py", "acl.py", "context_processors.py", "app_cache.py"], "views": [{"name": "vewUserGrade$App", "note": "(ACL tags)", "write": false}, {"name": "vewAdmin$App", "note": "", "write": false}, {"name": "vewPerson$App", "note": "", "write": false}, {"name": "vewLegend$App", "note": "(exception descriptions)", "write": false}], "tables": [{"name": "tblAuthPerson", "note": "", "write": false}, {"name": "tblPerson", "note": "", "write": false}, {"name": "tblRole", "note": "", "write": false}, {"name": "tblAdminMenuItem", "note": "", "write": false}, {"name": "tblUserGrade", "note": "", "write": false}, {"name": "tblSetting", "note": "", "write": false}], "notes": "Reads request.auth_user; admin menu from tblAdminMenuItem filtered by tags"}], "objmap": {"vewLegend$App": {"cls": "vewLegend", "kind": "View", "notes": "Exception/legend code descriptions"}, "vewTaskLog_Recent$App": {"cls": "vewTaskLog_Recent", "kind": "View", "notes": "Recent task logs; REST API + dashboards"}, "vewTask$App": {"cls": "vewTask", "kind": "View", "notes": "Task list / search"}, "vewTaskLog$App": {"cls": "vewTaskLog", "kind": "View", "notes": "Task-log lookup (exception handlers)"}, "vewActivitiesTimesheetMaster$App": {"cls": "vewActivitiesTimesheetMaster", "kind": "View", "notes": "Activities master grid"}, "vewActivitiesTimesheetDetails$App": {"cls": "vewActivitiesTimesheetDetails", "kind": "View", "notes": "Activities details grid"}, "vewActivitiesTimesheetExceptionCorrection$App": {"cls": "vewActivitiesTimesheetExceptionCorrection", "kind": "View", "notes": "Exception-correction grid"}, "vewTaskLogCorrection$App": {"cls": "vewTaskLogCorrection", "kind": "View", "notes": "Correction history / approval grid"}, "vewTaskLogsAndCorrections$App": {"cls": "vewTaskLogsAndCorrections_App", "kind": "View", "notes": "CLASS NAME DIFFERS (_App, not base); duplicate-entry check"}, "vewPerson$App": {"cls": "vewPerson", "kind": "View", "notes": "Person search"}, "vewAdmin$App": {"cls": "vewAdmin", "kind": "View", "notes": "Admin lookups"}, "vewAttendanceExceptionMenu$App": {"cls": "vewAttendanceExceptionMenu", "kind": "View", "notes": "Attendance exception category tree"}, "vewAttendanceExceptionLog$App": {"cls": "vewAttendanceExceptionLog", "kind": "View", "notes": "Attendance exception history / approval"}, "vewUserGrade$App": {"cls": "vewUserGrade", "kind": "View", "notes": "ACL tag permissions"}, "vewTransferViewToGoogleSheet$App": {"cls": "vewTransferViewToGoogleSheet", "kind": "View", "notes": "Google Sheets transfer view"}, "tblSetting": {"cls": "tblSetting", "kind": "Table", "notes": "App settings (via get_setting)"}, "tblTask": {"cls": "tblTask", "kind": "Table", "notes": "Task catalogue"}, "tblRole": {"cls": "tblRole", "kind": "Table", "notes": "Roles"}, "tblPerson": {"cls": "tblPerson", "kind": "Table", "notes": "People"}, "tblAuthPerson": {"cls": "tblAuthPerson", "kind": "Table", "notes": "OAuth link -> person"}, "tblTaskLog": {"cls": "tblTaskLog", "kind": "Table", "notes": "Primary task-log writes"}, "tblTaskLogExceptionCorrection": {"cls": "tblTaskLogExceptionCorrection", "kind": "Table", "notes": "Unified corrections table (was tblActivitiesExceptionCorrection + merged tblTaskLogCorrectionRequest)"}, "tblAttendanceExceptionCategory": {"cls": "tblAttendanceExceptionCategory", "kind": "Table", "notes": "Attendance exception categories"}, "tblAttendanceExceptionCategoryGroup": {"cls": "tblAttendanceExceptionCategoryGroup", "kind": "Table", "notes": "Category groups"}, "tblAttendanceExceptionLog": {"cls": "tblAttendanceExceptionLog", "kind": "Table", "notes": "Attendance exception writes"}, "tblAttendanceExceptionApproval": {"cls": "tblAttendanceExceptionApproval", "kind": "Table", "notes": "Attendance exception approvals"}, "tblAdminMenuItem": {"cls": "tblAdminMenuItem", "kind": "Table", "notes": "Admin menu items"}, "tblUserGrade": {"cls": "tblUserGrade", "kind": "Table", "notes": "User grades (permission tags)"}}, "generated": "2026-07-28", "explorer": "https://amousavi-ktv.github.io/KTV_WorkActivityDB/"};
+const $ = s => document.querySelector(s);
+const esc = s => (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CURVIEW='pages', AREA='', Q='';
+
+/* ---- theme ---- */
+(function(){ const t=localStorage.getItem('pm-theme'); if(t) document.documentElement.setAttribute('data-theme',t); })();
+$('#themeBtn').onclick=()=>{
+  const cur=document.documentElement.getAttribute('data-theme')
+    || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  const nxt=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',nxt); localStorage.setItem('pm-theme',nxt);
+};
+
+/* ---- reverse index: object -> uses ---- */
+function buildIndex(){
+  const idx={};
+  const add=(name,kind,use)=>{ (idx[name]=idx[name]||{name,kind,uses:[]}).uses.push(use); };
+  DATA.pages.forEach(p=>{
+    p.views.forEach(v=>add(v.name,'view',{page:p.page,area:p.area,write:false,note:v.note}));
+    p.tables.forEach(t=>add(t.name,'table',{page:p.page,area:p.area,write:!!t.write,note:t.note}));
+  });
+  return idx;
+}
+const INDEX=buildIndex();
+
+/* ---- stats + area chips ---- */
+(function(){
+  const views=new Set(), tables=new Set();
+  DATA.pages.forEach(p=>{p.views.forEach(v=>views.add(v.name));p.tables.forEach(t=>tables.add(t.name));});
+  $('#sPages').textContent=DATA.pages.length; $('#sViews').textContent=views.size; $('#sTables').textContent=tables.size;
+  const areas=[...new Set(DATA.pages.map(p=>p.area))];
+  const wrap=$('#areaChips');
+  const mk=(label,val)=>{const b=document.createElement('button');b.className='chip'+(val===AREA?' active':'');
+    b.textContent=label;b.onclick=()=>{AREA=(AREA===val?'':val);render();
+      [...wrap.children].forEach(c=>c.classList.toggle('active',c===b&&AREA===val));};return b;};
+  wrap.appendChild(mk('All areas',''));
+  areas.forEach(a=>wrap.appendChild(mk(a,a)));
+})();
+
+/* ---- helpers ---- */
+const hay = p => [p.area,p.page,p.opened,p.notes,...p.master,...p.fragments,...p.forms,...p.modules,
+                  ...p.views.map(v=>v.name),...p.tables.map(t=>t.name)].join(' ').toLowerCase();
+function hi(text){ if(!Q) return esc(text); const i=text.toLowerCase().indexOf(Q);
+  if(i<0) return esc(text); return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+Q.length))+'</mark>'+esc(text.slice(i+Q.length)); }
+function pill(o,kind){ const w=kind==='table'&&o.write;
+  return `<span class="pill ${kind}${w?' write':''}" title="${esc(o.note||o.name)}" data-obj="${esc(o.name)}">`
+    +hi(o.name)+(w?'<span class="wb">WRITE</span>':'')+'</span>'; }
+function codeblock(p){
+  const seg=(lbl,arr)=>arr.length?`<span class="lbl">${lbl}</span><span class="val">${arr.map(x=>hi(x)).join('<br>')}</span>`:'';
+  return seg('Template',p.master)+seg('Fragments',p.fragments)+seg('Forms',p.forms)+seg('Views&nbsp;module',p.modules);
+}
+
+/* ---- render pages ---- */
+function renderPages(list){
+  if(!list.length){ $('#pagesView').hidden=true; $('#noResults').hidden=false; return; }
+  $('#noResults').hidden=true; $('#pagesView').hidden=false;
+  let h='<table><thead><tr><th>Area</th><th>Page</th><th>Code</th><th>DB views (read)</th><th>DB tables</th></tr></thead><tbody>';
+  list.forEach((p,i)=>{
+    const nt=p.notes?`<span class="notestoggle" data-n="${i}">notes &#9662;</span><div class="notes" id="n${i}" hidden>${hi(p.notes)}</div>`:'';
+    h+=`<tr>
+      <td><span class="areabadge">${hi(p.area)}</span></td>
+      <td><div class="pagename">${hi(p.page)}</div><div class="opened">${hi(p.opened)}</div>${nt}</td>
+      <td class="codecell">${codeblock(p)}</td>
+      <td><div class="pills">${p.views.map(v=>pill(v,'view')).join('')||'<span class="opened">&mdash;</span>'}</div></td>
+      <td><div class="pills">${p.tables.map(t=>pill(t,'table')).join('')||'<span class="opened">&mdash;</span>'}</div></td>
+    </tr>`;
+  });
+  h+='</tbody></table>'; $('#pagesView').innerHTML=h;
+}
+
+/* ---- render objects ---- */
+function renderObjects(){
+  const names=Object.keys(INDEX).sort((a,b)=>{
+    const ka=INDEX[a].kind,kb=INDEX[b].kind;
+    if(ka!==kb) return ka==='view'?-1:1; return a.localeCompare(b); });
+  const cards=names.filter(n=>{
+    if(!Q) return true;
+    if(n.toLowerCase().includes(Q)) return true;
+    return INDEX[n].uses.some(u=>u.page.toLowerCase().includes(Q));
+  });
+  if(!cards.length){ $('#objectsView').hidden=true; $('#noResults').hidden=false; return; }
+  $('#noResults').hidden=true; $('#objectsView').hidden=false;
+  $('#objectsView').innerHTML=cards.map(n=>{
+    const o=INDEX[n], meta=DATA.objmap[n]||{}, k=o.kind;
+    const uses=o.uses.slice().sort((a,b)=>(a.write?0:1)-(b.write?0:1)||a.page.localeCompare(b.page));
+    const li=uses.map(u=>`<li><span class="rw ${u.write?'write':'read'}">${u.write?'WRITE':'READ'}</span><span>${hi(u.page)}</span></li>`).join('');
+    return `<div class="objcard">
+      <h3><span class="kindtag ${k}">${k}</span>${hi(n)}</h3>
+      ${meta.cls?`<div class="cls">models.py: ${esc(meta.cls)}</div>`:''}
+      ${meta.notes?`<div class="desc">${hi(meta.notes)}</div>`:''}
+      <ul class="uselist">${li}</ul>
+    </div>`;
+  }).join('');
+}
+
+/* ---- master render ---- */
+function render(){
+  $('#hint').textContent = CURVIEW==='pages'
+    ? 'One row per page. Teal = view (read), amber = table; WRITE marks a written table. Click an object to pivot.'
+    : 'One card per DB object: every page that reads or writes it. Click a page name in Pages view to trace back.';
+  if(CURVIEW==='pages'){
+    $('#objectsView').hidden=true;
+    let list=DATA.pages;
+    if(AREA) list=list.filter(p=>p.area===AREA);
+    if(Q) list=list.filter(p=>hay(p).includes(Q));
+    renderPages(list);
+  } else {
+    $('#pagesView').hidden=true;
+    renderObjects();
+  }
+}
+
+/* ---- events ---- */
+$('#viewToggle').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  CURVIEW=b.dataset.view;
+  [...$('#viewToggle').children].forEach(x=>x.classList.toggle('active',x===b));
+  render();
+});
+$('#q').addEventListener('input',e=>{Q=e.target.value.trim().toLowerCase();render();});
+document.addEventListener('click',e=>{
+  const nt=e.target.closest('.notestoggle');
+  if(nt){ const d=$('#n'+nt.dataset.n); if(d) d.hidden=!d.hidden; return; }
+  const pl=e.target.closest('.pill');
+  if(pl){ const obj=pl.dataset.obj; CURVIEW='objects';
+    [...$('#viewToggle').children].forEach(x=>x.classList.toggle('active',x.dataset.view==='objects'));
+    $('#q').value=obj; Q=obj.toLowerCase(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+});
+
+render();
+</script>
+</body>
+</html>
