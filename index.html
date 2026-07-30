@@ -2960,7 +2960,7 @@ const COLREFS=[
       const st=statusOf(o.obj, selectedCol);
       const stchip = st ? '<span class="strole '+st+'" title="'+STATUS_TITLE[st]+'">'+STATUS_LABEL[st]+'</span>' : '';
       row.innerHTML='<span class="caret leaf">▶</span><span class="dot '+k+'"></span>'+
-        '<span class="label">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag+stchip;
+        '<span class="label" style="white-space:nowrap;overflow-wrap:normal;flex:0 0 auto">'+o.obj+'</span><span class="ctype">'+o.type+'</span>'+flag+stchip;
       row.addEventListener('click',function(){ select(o.obj, selectedCol); });
       tree.appendChild(row);
     });
@@ -2976,14 +2976,15 @@ const COLREFS=[
     usersU.sort(function(a,b){ const ka=kindOf(a.obj), kb=kindOf(b.obj); return ka===kb ? a.obj.localeCompare(b.obj) : ord[ka]-ord[kb]; });
     if(usersU.length){
       const uh=document.createElement('div'); uh.className='row colhdr2'; uh.style.marginTop='12px';
-      uh.innerHTML='<span class="caret leaf">▶</span><span class="label">used by <b>'+usersU.length+'</b> object'+(usersU.length===1?'':'s')+' <span style="color:var(--faint);font-weight:400">(WHERE / JOIN / SELECT)</span></span><span class="hstatus">from</span>';
+      uh.innerHTML='<span class="caret leaf">▶</span><span class="label" style="white-space:nowrap">used by <b>'+usersU.length+'</b> object'+(usersU.length===1?'':'s')+' <span style="color:var(--faint);font-weight:400">(WHERE / JOIN / SELECT)</span></span><span class="hstatus">from</span>';
       tree.appendChild(uh);
       usersU.forEach(function(u){
         const k=kindOf(u.obj);
         const row=document.createElement('div'); row.className='row clickable';
         row.title='Open '+u.obj+'’s dependency tree';
         row.innerHTML='<span class="caret leaf">▶</span><span class="dot '+k+'"></span>'+
-          '<span class="label">'+u.obj+'</span><span class="ctype" style="color:var(--muted)">'+u.froms.join(', ')+'</span>';
+          '<span class="label" style="white-space:nowrap;overflow-wrap:normal;flex:0 0 auto">'+u.obj+'</span>'+
+          '<span class="ctype" style="color:var(--muted);white-space:nowrap;max-width:34ch;overflow:hidden;text-overflow:ellipsis" title="from '+u.froms.join(', ').replace(/"/g,'&quot;')+'">'+(u.froms.length===1?u.froms[0]:u.froms.length+' sources')+'</span>';
         row.addEventListener('click',function(){ select(u.obj, selectedCol); });
         tree.appendChild(row);
       });
